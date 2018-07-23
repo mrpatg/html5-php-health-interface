@@ -23,6 +23,7 @@
                     <h4 class="mb-3">Search Locations</h4>
                     <label for="location_name">Location Name</label>
                     <input type="text" id="location_name" class="form-control">
+                    <button type="button" id="location_search" class="btn btn-primary form-control">Search</button>
                 </div>
             </div>
         </div>
@@ -30,35 +31,93 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <h6 class="col-md-3 mb-3">Results</h6>
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item  d-flex justify-space-between 1h-condensed">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    McDonald's #1234
-                                    4901 Robert C Byrd Drive<br>
-                                    Last Inspection: July 1 2018<br>
-                                </div>
-                                <div class="col-md-6">
-                                    <p>
-                                        July 1 2018
-                                        <span class="badge badge-danger">2l</span>
-                                        <span class="badge badge-warning">10</span>
-                                        <span class="badge badge-success">Follow-Up</span>
-                                    </p>
-                                    <p>
-                                        May 4 2018
-                                        <span class="badge badge-danger">0</span>
-                                        <span class="badge badge-secondary">3</span>
-                                        <span class="badge badge-success">Routine</span>
-                                    </p>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
+                <h6 class="col-md-3 mb-3" id="results_text"></h6>
+                    <table class="table table-sm table-responsive table-hover" id="results-container">
+                    </table>
             </div>
         </div>
     </div>
+    <script type="text/javascript">
     
+    $('#location_search').click(function () {
+        var query = $('#location_name').val();
+        $.ajax({
+            url: 'https://health.beckley.io/api/locations/search/' + query,
+            dataType: 'json',
+            success: function (data) {
+                console.log(data.data);
+                if(data.data.length > 0){
+                    $('#results_text').text(data.data.length + ' results for ' + query);
+                }else{
+                    $('#results_text').text('No results for ' + query); 
+                }
+                // Empty the results-container
+                $('#results-container').empty();
+                // Establish content variable
+                var content;
+                // Loop through returned data and appent to the results container if any exists
+                for (var x = 0; x < data.data.length; x++) {
+                    content = '<tr>';
+                    content += '<td">';
+                    content += data.data[x].location_name;
+                    content += "</td><td>";
+                    content += data.data[x].location_address;
+                    content += "</td><td>";
+                    content += data.data[x].location_last_inspection;
+                    content += '</td><td>';
+                    content += '<span class="badge badge-danger">' + data.data[x].reports_meta.critical_reports + ' critical</span>';
+                    content += '</td><td>';
+                    content += '<span class="badge badge-secondary">' + data.data[x].reports_meta.non_critical_reports + ' non-critical</span>';
+                    content += '</td><td>';
+                    content += '<button type="button" id="view_reports" data-location="' + data.data[x].location_id + '" class="btn btn-info btn-sm">view reports</button>';
+                    content += '</td>';
+                    content += '</tr>';
+                    $('#results-container').append(content);
+                // updateListing(data[x]);
+                }
+            }
+        });
+    });
+    $(document).on('click', '#view_reports', function(){
+        var query = $(this).data('location');
+        $.ajax({
+            url: 'https://health.beckley.io/api/report/search/' + query,
+            dataType: 'json',
+            success: function (data) {
+                if(data.data.length > 0){
+                    $('#results_text').text(data.data.length + ' results for ' + query);
+                }else{
+                    $('#results_text').text('No results for ' + query); 
+                }
+                console.log(data.data);
+                // Empty the results-container
+                $('#results-container').empty();
+                // Establish content variable
+                var content;
+                // Loop through returned data and appent to the results container if any exists
+                for (var x = 0; x < data.data.length; x++) {
+                    content = '<li class="list-group-item  d-flex justify-space-between 1h-condensed">';
+                    content += '<div class="col-md-3">';
+                    content += data.data[x].location_name;
+                    content += "<br>";
+                    content += data.data[x].location_address;
+                    content += "<br>";
+                    content += data.data[x].location_last_inspection;
+                    content += '</div>';
+                    content += '<div class="col-md-3">';
+                    content += '<span class="badge badge-danger">' + data.data[x].reports_meta.critical_reports + ' critical</span>';
+                    content += '<span class="badge badge-secondary">' + data.data[x].reports_meta.non_critical_reports + ' non-critical</span>';
+                    content += '<button type="button" id="view_reports" data-location="' + data.data[x].location_id + '" class="btn btn-info btn-sm">view reports</button>';
+                    content += '</div>';
+                    content += '</div>';
+                    content += '</li>';
+                    $('#results-container').append(content);
+                // updateListing(data[x]);
+                }
+            }
+        });
+    });
+    
+    </script>
 </body>
 </html>
