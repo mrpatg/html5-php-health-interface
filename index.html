@@ -69,7 +69,7 @@
                     content += '</td><td>';
                     content += '<span class="badge badge-secondary">' + data.data[x].reports_meta.non_critical_reports + ' non-critical</span>';
                     content += '</td><td>';
-                    content += '<button type="button" id="view_reports" data-location="' + data.data[x].location_id + '" class="btn btn-info btn-sm">view reports</button>';
+                    content += '<button type="button" id="view_reports" data-location-locality="' + data.data[x].locality_name + '" data-location-address="' + data.data[x].location_address + '" data-location-name="' + data.data[x].location_name + '" data-location="' + data.data[x].location_id + '" class="btn btn-info btn-sm">view reports</button>';
                     content += '</td>';
                     content += '</tr>';
                     $('#results-container').append(content);
@@ -80,12 +80,15 @@
     });
     $(document).on('click', '#view_reports', function(){
         var query = $(this).data('location');
+        var location_name = $(this).data('location-name');
+        var location_locality_name = $(this).data('location-locality');
+        var location_address = $(this).data('location-address');
         $.ajax({
             url: 'https://health.beckley.io/api/report/search/' + query,
             dataType: 'json',
             success: function (data) {
                 if(data.data.length > 0){
-                    $('#results_text').text(data.data.length + ' results for ' + query);
+                    $('#results_text').text(data.data.length + ' results for ' + location_name + " " + location_address + " " + location_locality_name);
                 }else{
                     $('#results_text').text('No results for ' + query); 
                 }
@@ -94,23 +97,72 @@
                 $('#results-container').empty();
                 // Establish content variable
                 var content;
+                var content_head;
+                content_head = '<thead><tr><th>Report Date</th>';
+                content_head += '<th>Report Type</th>';
+                content_head += '<th>Non Critical</th>';
+                content_head += '<th>Critical</th>';
+                content_head += '<th>Action</th></tr></thead>';
+                $('#results-container').append(content_head);
                 // Loop through returned data and appent to the results container if any exists
                 for (var x = 0; x < data.data.length; x++) {
-                    content = '<li class="list-group-item  d-flex justify-space-between 1h-condensed">';
-                    content += '<div class="col-md-3">';
-                    content += data.data[x].location_name;
-                    content += "<br>";
-                    content += data.data[x].location_address;
-                    content += "<br>";
-                    content += data.data[x].location_last_inspection;
-                    content += '</div>';
-                    content += '<div class="col-md-3">';
-                    content += '<span class="badge badge-danger">' + data.data[x].reports_meta.critical_reports + ' critical</span>';
-                    content += '<span class="badge badge-secondary">' + data.data[x].reports_meta.non_critical_reports + ' non-critical</span>';
-                    content += '<button type="button" id="view_reports" data-location="' + data.data[x].location_id + '" class="btn btn-info btn-sm">view reports</button>';
-                    content += '</div>';
-                    content += '</div>';
-                    content += '</li>';
+                    content = '<tr>';
+                    content += '<td>';
+                    content += data.data[x].report_date;
+                    content += "</td><td>";
+                    content += data.data[x].report_type;
+                    content += "</td><td>";
+                    content += data.data[x].report_non_critical;
+                    content += "</td><td>";
+                    content += data.data[x].report_critical;
+                    content += '</td><td>';
+                    content += '<button type="button" id="single_report" data-report-id="' + data.data[x].report_id + '" class="btn btn-info btn-sm">view report</button>';
+                    content += '</td>';
+                    content += '</tr>';
+                    $('#results-container').append(content);
+                // updateListing(data[x]);
+                }
+            }
+        });
+    });
+    $(document).on('click', '#single_report', function(){
+        var query = $(this).data('report-id');
+        $.ajax({
+            url: 'https://health.beckley.io/api/details/search/' + query,
+            dataType: 'json',
+            success: function (data) {
+                if(data.data.length > 0){
+                    
+                }else{
+                    
+                }
+                console.log(data.data);
+                // Empty the results-container
+                $('#results-container').empty();
+                // Establish content variable
+                var content;
+                var content_head;
+                content_head = '<thead><tr><th>Report Date</th>';
+                content_head += '<th>Report Type</th>';
+                content_head += '<th>Non Critical</th>';
+                content_head += '<th>Critical</th>';
+                content_head += '<th>Action</th></tr></thead>';
+                $('#results-container').append(content_head);
+                // Loop through returned data and appent to the results container if any exists
+                for (var x = 0; x < data.data.length; x++) {
+                    content = '<tr>';
+                    content += '<td>';
+                    content += data.data[x].report_date;
+                    content += "</td><td>";
+                    content += data.data[x].report_type;
+                    content += "</td><td>";
+                    content += data.data[x].report_non_critical;
+                    content += "</td><td>";
+                    content += data.data[x].report_critical;
+                    content += '</td><td>';
+                    content += '<button type="button" id="single_report" data-report-id="' + data.data[x].report_id + ' class="btn btn-info btn-sm">view report</button>';
+                    content += '</td>';
+                    content += '</tr>';
                     $('#results-container').append(content);
                 // updateListing(data[x]);
                 }
