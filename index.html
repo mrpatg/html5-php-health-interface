@@ -26,7 +26,7 @@
                 <div class="col-md-4">
                     <div class="card" style="width: 18rem;">
                         <div class="card-body">
-                            <h5 class="card-title">Search Locations</h5>
+                            <h5 class="card-title text-center">Search Locations</h5>
                             <p class="card-text">
                                 <input type="text" id="location_name" class="form-control">
                                 <button type="button" id="location_search" class="btn btn-primary form-control">Search</button> 
@@ -37,16 +37,16 @@
                 <div class="col-md-4">
                     <div class="card" style="width: 18rem;">
                         <div class="card-body">
-                            <h5 class="card-title">Total Locations</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            <h5 class="card-title text-center">Total Locations</h5>
+                            <p class="card-text display-4 text-center" id="location_count"></p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="card" style="width: 18rem;">
                         <div class="card-body">
-                            <h5 class="card-title">Total Reports</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            <h5 class="card-title text-center">Total Reports</h5>
+                            <p class="card-text display-4 text-center" id="report_count"></p>
                         </div>
                     </div>
                 </div>
@@ -73,7 +73,16 @@
     <script type="text/javascript">
 
     $( document ).ready(function() {
-        
+        $.ajax({
+            url: 'https://health.beckley.io/api/stats',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                // Empty the results-container
+                $('#location_count').text(data.data.locations_count);
+                $('#report_count').text(data.data.reports_count);
+            }
+        });
     });
     
     $('#location_search').click(function () {
@@ -185,16 +194,17 @@
                 $('#right-results-container').append(content_head);
                 // Loop through returned data and appent to the results container if any exists
                 for (var x = 0; x < data.data.length; x++) {
-                    content = '<li class="list-group-item d-flex justify-content-between lh-condensed">';
+                    content = '<li class="list-group-item d-flex justify-content-between lh-condensed"><div class="container"><div class="row">';
                     if(data.data[x].report_code.length > 0){
-                        content += '<p><small>' + data.data[x].report_code;
+                        content += '<div class="col-3"><small>' + data.data[x].report_code;
                         if(data.data[x].report_code_name.length > 0){
                             content += ' ' + data.data[x].report_code_name;
                         }
-                        content += '</small></p><p>';                        
+                        content += '</small></div>';                        
                     }
+                    content += '<div class="col-9">';
                     content += data.data[x].report_details;
-                    content += '</p></li>';
+                    content += '</div></div></div></li>';
                     $('#right-results-container').append(content);
                 // updateListing(data[x]);
                 }
