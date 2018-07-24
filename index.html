@@ -16,14 +16,39 @@
             <h2>Beckley.io Health API</h2>
             <p class="lead">This is a simple interface to search and navigate the beckley.io health inspection score API</p>
         </div>
-        
         <div class="col-md-12">
             <div class="row">
-                <div class="col-md-3 mb-3">
-                    <h4 class="mb-3">Search Locations</h4>
-                    <label for="location_name">Location Name</label>
-                    <input type="text" id="location_name" class="form-control">
-                    <button type="button" id="location_search" class="btn btn-primary form-control">Search</button>
+
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">Search Locations</h5>
+                            <p class="card-text">
+                                <input type="text" id="location_name" class="form-control">
+                                <button type="button" id="location_search" class="btn btn-primary form-control">Search</button> 
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Locations</h5>
+                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Reports</h5>
+                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -31,13 +56,25 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <h6 class="col-md-3 mb-3" id="results_text"></h6>
-                    <table class="table table-sm table-responsive table-hover" id="results-container">
-                    </table>
+                <h6 class="col-md-9 mb-9" id="results_text"></h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-sm table-responsive table-hover" id="results-container">
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                            <table class="table table-sm table-responsive table-hover" id="right-results-container">
+                            </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     <script type="text/javascript">
+
+    $( document ).ready(function() {
+        
+    });
     
     $('#location_search').click(function () {
         var query = $('#location_name').val();
@@ -53,6 +90,7 @@
                 }
                 // Empty the results-container
                 $('#results-container').empty();
+                $('#right-results-container').empty();
                 // Establish content variable
                 var content;
                 // Loop through returned data and appent to the results container if any exists
@@ -95,6 +133,7 @@
                 console.log(data.data);
                 // Empty the results-container
                 $('#results-container').empty();
+                $('#right-results-container').empty();
                 // Establish content variable
                 var content;
                 var content_head;
@@ -128,7 +167,7 @@
     $(document).on('click', '#single_report', function(){
         var query = $(this).data('report-id');
         $.ajax({
-            url: 'https://health.beckley.io/api/details/search/' + query,
+            url: 'https://health.beckley.io/api/details/' + query,
             dataType: 'json',
             success: function (data) {
                 if(data.data.length > 0){
@@ -138,34 +177,29 @@
                 }
                 console.log(data.data);
                 // Empty the results-container
-                $('#results-container').empty();
+                $('#right-results-container').empty();
                 // Establish content variable
                 var content;
                 var content_head;
-                content_head = '<thead><tr><th>Report Date</th>';
-                content_head += '<th>Report Type</th>';
-                content_head += '<th>Non Critical</th>';
-                content_head += '<th>Critical</th>';
-                content_head += '<th>Action</th></tr></thead>';
-                $('#results-container').append(content_head);
+                content_head = '<ul class="list-group mb-3">';
+                $('#right-results-container').append(content_head);
                 // Loop through returned data and appent to the results container if any exists
                 for (var x = 0; x < data.data.length; x++) {
-                    content = '<tr>';
-                    content += '<td>';
-                    content += data.data[x].report_date;
-                    content += "</td><td>";
-                    content += data.data[x].report_type;
-                    content += "</td><td>";
-                    content += data.data[x].report_non_critical;
-                    content += "</td><td>";
-                    content += data.data[x].report_critical;
-                    content += '</td><td>';
-                    content += '<button type="button" id="single_report" data-report-id="' + data.data[x].report_id + ' class="btn btn-info btn-sm">view report</button>';
-                    content += '</td>';
-                    content += '</tr>';
-                    $('#results-container').append(content);
+                    content = '<li class="list-group-item d-flex justify-content-between lh-condensed">';
+                    if(data.data[x].report_code.length > 0){
+                        content += '<p><small>' + data.data[x].report_code;
+                        if(data.data[x].report_code_name.length > 0){
+                            content += ' ' + data.data[x].report_code_name;
+                        }
+                        content += '</small></p><p>';                        
+                    }
+                    content += data.data[x].report_details;
+                    content += '</p></li>';
+                    $('#right-results-container').append(content);
                 // updateListing(data[x]);
                 }
+                content_footer = '</ul>';
+                $('#right-results-container').append(content_footer);
             }
         });
     });
