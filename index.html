@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.min.css" />
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
+    <script src="js/api.js"></script>
 </head>
 <body>
     <div class="container">
@@ -52,27 +53,43 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <h6 class="col-md-9 mb-9 col-sm-12" id="results_text"></h6>
-                <div class="row">
-                    <div class="col-md-6 col-sm-12">
-                        <div class="nav-container" id="breadcrumbs">
-
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    
+                    <div class="row">
+                        <div class="col-md-6 col-sm-12">
+                            <div class="nav-container" id="breadcrumbs">
+    
+                            </div>
+                            <h6 class="col-md-9 mb-9 col-sm-12" id="results_text"></h6>
+                            <div id="results-container">
+                            </div>
                         </div>
-                        <div id="results-container">
+                        <div class="col-md-6 col-sm-12">
+                                <table class="table table-sm table-responsive table-hover" id="right-results-container">
+                                </table>
                         </div>
-                    </div>
-                    <div class="col-md-6 col-sm-12">
-                            <table class="table table-sm table-responsive table-hover" id="right-results-container">
-                            </table>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-sm-12">
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title text-center">Browse Locations</h5>
+                            <p class="card-text" id="browse_locations">
+                                
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
     </div>
+    
     <footer class="footer">
         <div class="text-center container">
             <span class="text-muted">Patrick Godbey (<a href="https://twitter.com/mrpatg">@mrpatg</a>) - <a href="https://github.com/mrpatg/html5-php-health-interface">GitHub</a> </span>
@@ -81,6 +98,20 @@
     <script type="text/javascript">
 
     $( document ).ready(function() {
+
+        // Browse locations - Disabled for now.
+        // $.ajax({
+        //     url: 'https://health.beckley.io/api/locations',
+        //     dataType: 'json',
+        //     success: function (locations) {
+        //         // Empty the results-container
+        //         var content = '';
+        //         for (var x = 0; x < locations.data.length; x++) {
+        //             content += '<a href="#" id="location_search_link" data-location-name=' + locations.data[x].location_name + ' data-location-search-id="' + locations.data[x].location_id + '">' + locations.data[x].location_name + '</a><br>';
+        //         }
+        //         $('#browse_locations').html(content);
+        //     }
+        // });
         $.ajax({
             url: 'https://health.beckley.io/api/stats',
             dataType: 'json',
@@ -94,52 +125,18 @@
     });
     
     $('#location_search').click(function () {
-        var query = $('#location_name').val();
-        $.ajax({
-            url: 'https://health.beckley.io/api/locations/search/' + query,
-            dataType: 'json',
-            success: function (data) {
-                console.log(data.data);
-                if(data.data.length > 0){
-                    $('#results_text').text(data.data.length + ' results for ' + query);
-                }else{
-                    $('#results_text').text('No results for ' + query); 
-                }
-                // Empty the results-container
-                $('#results-container').empty();
-                $('#right-results-container').empty();
-                // Establish content variable
-                var content;
-                // Loop through returned data and appent to the results container if any exists
-                content = '<div class="list-group">';
-                for (var x = 0; x < data.data.length; x++) {
-                    var content;
-                    content = '<a href="#" id="view_reports" data-location-name="' + data.data[x].location_name + '" data-query="' + query + '"';
-                    content += 'data-location-locality="'+ data.data[x].locality_name +'" data-location-address="' + data.data[x].location_address + '" ';
-                    content += 'data-location="' + data.data[x].location_id + '" class="list-group-item list-group-item-action flex-column align-items-start">';
-                    content += '<div class="d-inline-flex w-100 justify-content-start">';
-                    content += '<div class="alert alert-danger mx-1">';
-                    content += data.data[x].reports_meta['critical_reports'];
-                    content += '</div>';
-                    content += '<div class="alert alert-secondary mx-1">';
-                    content += data.data[x].reports_meta['non_critical_reports'];
-                    content += '</div>';
-                    content += '<div><h5>';
-                    content += data.data[x].location_name;    
-                    content += '</h5>';
-                    content += '<small>';
-                    content += data.data[x].location_address;
-                    content += '</small></div>';
-                    content += '</div>';
-                    content += '</a>';
-                    $('#results-container').append(content);
-                // updateListing(data[x]);
-                }
-                content_footer = '</div>';
-                $('#results-container').append(content_footer);
-            }
-        });
+
+        locationSearch($('#location_name').val());
     });
+    $(document).on('click', '#location_search_link', function(){
+
+        locationSearch($(this).data('location-name'));
+    });
+    $(document).on('click', '#breadcrumb-search', function(){
+
+        locationSearch($(this).data('search-breadcrumb'));
+    });
+
     $(document).on('click', '#view_reports', function(){
         var search_query = $(this).data('query');
         var query = $(this).data('location');
@@ -156,7 +153,7 @@
                     url: 'https://health.beckley.io/api/report/search/' + query,
                     dataType: 'json',
                     success: function (data) {
-                        $('#breadcrumbs').text('<< Search:' + search_query); 
+                        $('#breadcrumbs').html('<button class="btn btn-sm btn-secondary" id="breadcrumb-search" data-search-breadcrumb="' + search_query + '"> <- Results for "' + search_query + '"</button>'); 
                         if(data.data.length > 0){
                             $('#results_text').text(data.data.length + ' results for ' + location_name + " " + location_address + " " + location_locality_name);
                         }else{
@@ -168,26 +165,33 @@
                         // Establish content variable
                         var content;
                         var content_head;
+                        content_head = '<ul class="list-group mb-3">';
                         $('#results-container').append(content_head);
 
                         // Loop through returned data and appent to the results container if any exists
                         for (var x = 0; x < data.data.length; x++) {
-                            var report_id;
                             var report_id = data.data[x].report_id;
-                            content = '<div><button class="btn btn-light" type="button" data-target="#report' + report_id + '" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="report' + report_id + '">';
-                            content += data.data[x].report_date;
-                            content += data.data[x].report_type;
-                            content += data.data[x].report_non_critical;
+                            content = '<div><li class="list-group-item d-flex justify-content-between lh-condensed" data-target="#report' + report_id + '" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="report' + report_id + '">';
+                            content += '<div class="align-self-center "><span class="text-muted"><small>' + data.data[x].report_date + '</small></span> <br>';
+                            content += '' + data.data[x].report_type + '</div>';
+                            content += '<div class="align-self-center badge badge-danger text-center">';
                             content += data.data[x].report_critical;
-                            content += '</button></div>';
-                            content += '<div class="collapse" id="report'+ report_id +'"><div class="card card-body">';
+                            content += ' C</div>';
+                            content += '<div class="align-self-center badge badge-secondary text-center">';
+                            content += data.data[x].report_non_critical;
+                            content += ' NC</div>';
+                            content += '</li></div>';
+                            content += '<div class="collapse" id="report'+ report_id +'"><div class="card card-body"><ul class="list-group mb-3">';
                             $.each(full_data.data[report_id], function(index, value) {
-                                content += value.report_code;
-                                content += value.report_code_name;
-                                content += value.report_details;
-                                content += '<br>';
+                                content += '<li class="list-group-item d-flex justify-content-between lh-condensed"><div>';
+                                content += '<span class="text-muted">'+ value.report_code +'</span>';
+                                if(value.report_code_name.length>0){
+                                    content += ' / <span class="text-muted">'+ value.report_code_name +'</span>';
+                                }
+                                content += '<h6 class="my-0">' + value.report_details + '</h6>';
+                                content += '</div></li>';
                             });
-                            content += '</div></div>';
+                            content += '</ul></div></ul>';
                             $('#results-container').append(content);
                         // updateListing(data[x]);
                         }
