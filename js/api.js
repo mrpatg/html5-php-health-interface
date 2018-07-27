@@ -53,4 +53,3 @@ function clearReports(){
 function clearBrowse(){
     $('#browse_locations').empty();
 }
-
