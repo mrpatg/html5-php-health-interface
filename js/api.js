@@ -23,19 +23,19 @@ function locationSearch(query){
                     content = '<li id="view_reports" data-location-name="' + data.data[x].location_name + '" data-query="' + query + '"';
                     content += 'data-location-locality="'+ data.data[x].locality_name +'" data-location-address="' + data.data[x].location_address + '" ';
                     content += 'data-location="' + data.data[x].location_id + '" class="list-group-item list-group-item-action flex-column align-items-start">';
-                    content += '<div class="d-inline-flex w-100 justify-content-between">';
-                    content += '<div>';
+                    content += '<div class="row">';
+                    content += '<div class="col-md-8">';
                     content += data.data[x].location_name;
                     content += '<br><small>';
                     content += data.data[x].location_address;
                     content += '</small>';
-                    content += '</div>';
+                    content += '</div><div class="col-md-4 text-right">';
                     content += '<div class="align-self-center badge badge-danger">';
                     content += data.data[x].reports_meta['critical_reports'];
                     content += '</div>';
                     content += '<div class="align-self-center badge badge-secondary">';
                     content += data.data[x].reports_meta['non_critical_reports'];
-                    content += '</div>';
+                    content += '</div></div>';
                     content += '</li>';
                     $('#results-container').append(content);
                 // updateListing(data[x]);
@@ -53,3 +53,19 @@ function clearReports(){
 function clearBrowse(){
     $('#browse_locations').empty();
 }
+
+$(document).on('click', '.list-group-item', function(){
+    detail_report_id = $(this).data('target');
+    color = $(this).data('color');
+    $(detail_report_id).toggleClass('detail_active');
+    $(this).toggleClass('detail_active');
+});
+$( document ).ready(function() {
+    $("#location_name").keydown(function(event) {
+
+        if (event.keyCode === 13) {
+            
+            locationSearch($('#location_name').val());
+        }
+    });
+});

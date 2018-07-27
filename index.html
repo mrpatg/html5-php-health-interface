@@ -13,43 +13,24 @@
 </head>
 <body>
     <div class="container">
-        <div class="py-5 text-center">
-            <h2>Beckley.io Health API</h2>
-            <p class="lead">This is a simple interface to search and navigate the beckley.io health inspection score API</p>
-        </div>
-        <div class="col-md-12">
-            <div class="row">
+            <div class="jumbotron">
+                <h1 class="display-4">Beckley.io Health API</h1>
+                <p class="lead">This is a simple interface to search and navigate the beckley.io health inspection score API</p>
 
             </div>
-        </div>
+
         <div class="col-md-12">
             <div class="row">
-                <div class="col-md-4 col-sm-12">
-                    <div class="card" style="width: 18rem;">
-                        <div class="card-body">
+                <div class="col-md-12 col-sm-12">
+
                             <h5 class="card-title text-center">Search Locations</h5>
-                            <p class="card-text">
-                                <input type="text" id="location_name" class="form-control">
-                                <button type="button" id="location_search" class="btn btn-primary form-control">Search</button> 
+                            <p class="card-text ">
+                                <div class="form-inline justify-content-center">
+                                    <input type="text" id="location_name" class="form-control" tabindex="1">
+                                    <button type="button" id="location_search" class="btn btn-primary form-control">Search</button> 
+                                </div>
                             </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-12">
-                    <div class="card" style="width: 18rem;">
-                        <div class="card-body">
-                            <h5 class="card-title text-center">Total Locations</h5>
-                            <p class="card-text display-4 text-center" id="location_count"></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-12">
-                    <div class="card" style="width: 18rem;">
-                        <div class="card-body">
-                            <h5 class="card-title text-center">Total Reports</h5>
-                            <p class="card-text display-4 text-center" id="report_count"></p>
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -58,17 +39,29 @@
                 <div class="col-md-12">
                     
                     <div class="row">
-                        <div class="col-md-6 col-sm-12">
-                            <div class="nav-container" id="breadcrumbs">
-    
+                        <div class="col-md-12 col-sm-12 justify-content-center">
+                            
+                            <div class="alert alert-secondary justify-content-center" role="alert" id="results_text_container">
+                                    <div id="breadcrumbs" class="text-center"></div>
+                                    <h6 class="col-md-12 text-center " id="results_text"></h6>
                             </div>
-                            <h6 class="col-md-9 mb-9 col-sm-12" id="results_text"></h6>
                             <div id="results-container">
                             </div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                            <div class="col-md-6 col-sm-12">
+
+                                    <h5 class="card-title text-center">Total Locations</h5>
+                                    <p class="card-text display-4 text-center" id="location_count"></p>
+        
                         </div>
                         <div class="col-md-6 col-sm-12">
-                                <table class="table table-sm table-responsive table-hover" id="right-results-container">
-                                </table>
+        
+                                    <h5 class="card-title text-center">Total Reports</h5>
+                                    <p class="card-text display-4 text-center" id="report_count"></p>
+        
                         </div>
                     </div>
                 </div>
@@ -135,6 +128,8 @@
     $(document).on('click', '#breadcrumb-search', function(){
 
         locationSearch($(this).data('search-breadcrumb'));
+        $(this).hide();
+
     });
 
     $(document).on('click', '#view_reports', function(){
@@ -153,7 +148,7 @@
                     url: 'https://health.beckley.io/api/report/search/' + query,
                     dataType: 'json',
                     success: function (data) {
-                        $('#breadcrumbs').html('<button class="btn btn-sm btn-secondary" id="breadcrumb-search" data-search-breadcrumb="' + search_query + '"> <- Results for "' + search_query + '"</button>'); 
+                        $('#breadcrumbs').html('<button class="btn btn-sm btn-light" id="breadcrumb-search" data-search-breadcrumb="' + search_query + '"> Back to search</button>'); 
                         if(data.data.length > 0){
                             $('#results_text').text(data.data.length + ' results for ' + location_name + " " + location_address + " " + location_locality_name);
                         }else{
@@ -171,19 +166,21 @@
 
                         // Loop through returned data and appent to the results container if any exists
                         for (var x = 0; x < data.data.length; x++) {
+
                             var report_id = data.data[x].report_id;
-                            content = '<div><li class="list-group-item d-flex justify-content-between lh-condensed" data-target="#report' + report_id + '" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="report' + report_id + '">';
-                            content += '<div class="align-self-center "><span class="text-muted"><small>' + data.data[x].report_date + '</small></span> <br>';
+                            content = '<div><li class="list-group-item" data-target="#report' + report_id + '" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="report' + report_id + '">';
+                            content += '<div class="row d-flex"><div class="col-sm-8 col-md-8"><span class="text-muted"><small>' + data.data[x].report_date + '</small></span> <br>';
                             content += '' + data.data[x].report_type + '</div>';
-                            content += '<div class="align-self-center badge badge-danger text-center">';
+                            content += '<div class="col-sm-4 col-md-4 text-right"><div class="badge badge-danger">';
                             content += data.data[x].report_critical;
-                            content += ' C</div>';
-                            content += '<div class="align-self-center badge badge-secondary text-center">';
+                            content += '</div>';
+                            content += '<div class="badge badge-secondary">';
                             content += data.data[x].report_non_critical;
-                            content += ' NC</div>';
+                            content += '</div></div>';
                             content += '</li></div>';
                             content += '<div class="collapse" id="report'+ report_id +'"><div class="card card-body"><ul class="list-group mb-3">';
                             $.each(full_data.data[report_id], function(index, value) {
+                                
                                 content += '<li class="list-group-item d-flex justify-content-between lh-condensed"><div>';
                                 content += '<span class="text-muted">'+ value.report_code +'</span>';
                                 if(value.report_code_name.length>0){

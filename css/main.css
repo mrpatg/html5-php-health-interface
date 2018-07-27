@@ -11,3 +11,12 @@ footer .container{
     max-width: 680px;
     padding: 0 15px;
 }
+.detail_active{
+    border-left:1px solid #f00!important;
+    border-top-left-radius: 0rem!important;
+    border-top-left-radius: 0rem!important;
+    background-color:#ececec!important;
+}
+li.list-group-item:hover{
+    background-color:#efefef!important;
+}
