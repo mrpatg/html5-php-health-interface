@@ -157,7 +157,8 @@
                         if(data.data.length > 0){
                             $('#results_text').text(data.data.length + ' results for ' + location_name + " " + location_address + " " + location_locality_name);
                         }else{
-                            $('#results_text').text('No results for ' + query); 
+                            $('#results_text').html('<p>No results for ' + location_name + '</p>');
+                            $('#results_text').append('<h5>Why does this happen?</h5><p>Sometimes locations are in the system but the have no reports.</p>');
                         }
                         // Empty the results-container
                         $('#results-container').empty();
